@@ -9,7 +9,8 @@
     "predev": "convex dev --until-success && convex dashboard",
     "build": "next build",
     "start": "next start",
-    "lint": "biome check"
+    "lint": "biome check",
+    "format": "biome format --write"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.60.0",
