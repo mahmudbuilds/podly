@@ -13,7 +13,7 @@ import { SignInButton } from "@clerk/nextjs";
 import { UserButton } from "@clerk/nextjs";
 
 export default function Home() {
-  return <div>Hello Mahmud</div>;
+  return <div>Hello Mahmud from another universe</div>;
 }
 
 
