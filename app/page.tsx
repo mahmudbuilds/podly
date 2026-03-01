@@ -1,19 +1,18 @@
-"use client";
-
-import {
-  Authenticated,
-  Unauthenticated,
-  useMutation,
-  useQuery,
-} from "convex/react";
-import { api } from "../convex/_generated/api";
-import Link from "next/link";
-import { SignUpButton } from "@clerk/nextjs";
-import { SignInButton } from "@clerk/nextjs";
-import { UserButton } from "@clerk/nextjs";
-
+import Header from "@/components/home/Header";
+import HeroSection from "@/components/home/HeroSection"
+import FeaturesSection from "@/components/home/FeaturesSection"
+import PricingSection from "@/components/home/PricingSection"
+import CTASection from "@/components/home/CTASection"
+import Footer from "@/components/home/Footer"
 export default function Home() {
-  return <div>Hello Mahmud from another universe</div>;
+  return (
+    <div>
+      <Header />
+      <HeroSection />
+      <FeaturesSection />
+      <PricingSection />
+      <CTASection />
+      <Footer />
+    </div>
+  );
 }
-
-
