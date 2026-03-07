@@ -89,7 +89,7 @@ export default function Footer() {
           {/* Bottom bar */}
           <div className="pt-8 border-t border-gray-200">
             <p className="text-center text-sm text-gray-600">
-              {new Date().getFullYear()} Podassi. This is a demo project.
+              {new Date().getFullYear()} Podly. All Rights Reserved.
             </p>
           </div>
         </div>
