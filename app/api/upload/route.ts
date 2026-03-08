@@ -1,38 +1,51 @@
 /**
  * File Upload API Route
- *
- * Generates pre-signed URLs for direct uploads to Vercel Blob.
- *
- * Flow:
- * 1. Client calls validateUploadAction server action (checks plan limits)
- * 2. If valid, client calls this route to get pre-signed upload URL
- * 3. Client uploads directly to Vercel Blob using the URL
- * 4. Client calls createProjectAction to finalize
- *
- * Note: Validation happens BEFORE this route is called (via server action).
- * This route only handles URL generation for the Vercel Blob upload.
  */
 import { type HandleUploadBody, handleUpload } from "@vercel/blob/client";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";   
 import { auth } from "@clerk/nextjs/server";
-import { apiError } from "@/lib/api-utils";
 import { ALLOWED_AUDIO_TYPES } from "@/lib/constants";
 import { PLAN_LIMITS } from "@/lib/tier-config";
 
+const getOrigin = (request: Request) => {
+  const origin = request.headers.get('origin');
+  if (process.env.NODE_ENV !== 'production') {
+    return origin || '*';
+  }
+  return 'https://podly-one.vercel.app';
+};
+
+const getCorsHeaders = (origin: string) => ({
+  'Access-Control-Allow-Origin': origin,
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Credentials': 'true',
+});
+
+export async function OPTIONS(request: Request) {
+  return new Response(null, {
+    status: 200,
+    headers: getCorsHeaders(getOrigin(request)),
+  });
+}
+
 export async function POST(request: Request): Promise<NextResponse> {
+  const origin = getOrigin(request);
+  const corsHeaders = getCorsHeaders(origin);
+
   try {
-    // Authenticate user
     const authObj = await auth();
     const { userId, has } = authObj;
 
     if (!userId) {
-      return apiError("Unauthorized", 401);
+      return NextResponse.json(
+        { error: "Unauthorized" }, 
+        { status: 401, headers: corsHeaders }
+      );
     }
 
-    // Parse Vercel Blob request body
     const body = (await request.json()) as HandleUploadBody;
 
-    // Determine user's plan and set file size limit
     let maxFileSize = PLAN_LIMITS.free.maxFileSize;
     if (has?.({ plan: "ultra" })) {
       maxFileSize = PLAN_LIMITS.ultra.maxFileSize;
@@ -40,28 +53,34 @@ export async function POST(request: Request): Promise<NextResponse> {
       maxFileSize = PLAN_LIMITS.pro.maxFileSize;
     }
 
-    // Generate pre-signed upload URL with plan-based constraints
     const jsonResponse = await handleUpload({
       body,
       request,
-      onBeforeGenerateToken: async () => ({
-        allowedContentTypes: ALLOWED_AUDIO_TYPES,
-        addRandomSuffix: true,
-        maximumSizeInBytes: maxFileSize,
-      }),
-      onUploadCompleted: async ({ blob }) => {
-        // console.log("Upload completed:", blob.url);
+      onBeforeGenerateToken: async (pathname: string) => {
+        return {
+          allowedContentTypes: ALLOWED_AUDIO_TYPES,
+          addRandomSuffix: true,
+          maximumSizeInBytes: maxFileSize,
+          tokenPayload: JSON.stringify({ userId }),
+        };
+      },
+      // ADDED: This property is required by the SDK type definition
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        // This code runs on Vercel's servers after the upload is done.
+        // It won't be called on localhost, but it MUST be defined.
+        console.log("Upload completed server-side:", blob.url);
       },
     });
 
-    return NextResponse.json(jsonResponse);
-  } catch (error) {
-    if (error instanceof NextResponse) return error;
+    return NextResponse.json(jsonResponse, {
+      headers: corsHeaders,
+    });
 
-    console.error("Upload error:", error);
-    return apiError(
-      error instanceof Error ? error.message : "Upload failed",
-      400
+  } catch (error) {
+    console.error("[UPLOAD] Error:", error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Upload failed" },
+      { status: 400, headers: corsHeaders }
     );
   }
 }

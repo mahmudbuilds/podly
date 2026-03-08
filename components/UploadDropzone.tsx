@@ -61,10 +61,21 @@ export function UploadDropzone({
     useDropzone({
       onDrop,
       // Accept configuration: Exhaustive list for cross-browser compatibility
-      accept: ALLOWED_AUDIO_TYPES.reduce((acc, type) => {
-        acc[type] = [type];
-        return acc;
-      }, {} as Record<string, string[]>),
+      accept: {
+        "audio/mpeg": [".mp3"], //MP3
+        "audio/x-m4a": [".m4a"], //M4A (iOS/Apple)
+        "audio/wav": [".wav", ".wave"], // WAV
+        "audio/x-wav": [".wav", ".wave"], // WAV (alternate MIME)
+        "audio/aac": ["aac"], // AAC
+        "audio/ogg": [".ogg", ".oga"], /// OGG Vorbis
+        "audio/opus": [".opus"], // OPUS
+        "audio/webm": [".webm"], // WebM Audio
+        "audio/flac": [".flac"], // FLAC
+        "audio/x-flac": [".flac"], // FLAC (alternate MIME)
+        "audio/3gpp": [".3gp"], // 3GP
+        "audio/3gpp2": [".3g2"] // 3G2
+
+      },
       maxSize, // File size limit (validates before upload)
       maxFiles: 1, // Only allow single file selection
       disabled, // Disable dropzone during upload

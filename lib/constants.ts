@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 
 // File upload constraints
-export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB limit
+export const MAX_FILE_SIZE = 4.5 * 1024 * 1024; // 100MB limit
 
 /**
  * Allowed audio MIME types for upload validation
@@ -25,6 +25,7 @@ export const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB limit
  * - Includes both standard and vendor-specific types
  * - Validated both client-side (dropzone) and server-side (API route)
  */
+
 export const ALLOWED_AUDIO_TYPES = [
   "audio/mpeg", // MP3 (standard)
   "audio/mp3", // MP3 (alternate)
