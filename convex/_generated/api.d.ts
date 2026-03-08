@@ -9,6 +9,7 @@
  */
 
 import type * as myFunctions from "../myFunctions.js";
+import type * as projects from "../projects.js";
 
 import type {
   ApiFromModules,
@@ -18,6 +19,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   myFunctions: typeof myFunctions;
+  projects: typeof projects;
 }>;
 
 /**

@@ -25,9 +25,9 @@
 "use client";
 
 import { FileAudio, Upload } from "lucide-react";
-import { useCallback } from "react";
+import { useCallback } from "react"; 
 import { useDropzone } from "react-dropzone";
-import { MAX_FILE_SIZE } from "@/lib/constants";
+import { MAX_FILE_SIZE, ALLOWED_AUDIO_TYPES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
 interface UploadDropzoneProps {
@@ -61,20 +61,10 @@ export function UploadDropzone({
     useDropzone({
       onDrop,
       // Accept configuration: Exhaustive list for cross-browser compatibility
-      accept: {
-        "audio/mpeg": [".mp3"], // MP3
-        "audio/x-m4a": [".m4a"], // M4A (iOS/Apple)
-        "audio/wav": [".wav", ".wave"], // WAV
-        "audio/x-wav": [".wav", ".wave"], // WAV (alternate MIME)
-        "audio/aac": [".aac"], // AAC
-        "audio/ogg": [".ogg", ".oga"], // OGG Vorbis
-        "audio/opus": [".opus"], // Opus
-        "audio/webm": [".webm"], // WebM Audio
-        "audio/flac": [".flac"], // FLAC
-        "audio/x-flac": [".flac"], // FLAC (alternate MIME)
-        "audio/3gpp": [".3gp"], // 3GP
-        "audio/3gpp2": [".3g2"], // 3G2
-      },
+      accept: ALLOWED_AUDIO_TYPES.reduce((acc, type) => {
+        acc[type] = [type];
+        return acc;
+      }, {} as Record<string, string[]>),
       maxSize, // File size limit (validates before upload)
       maxFiles: 1, // Only allow single file selection
       disabled, // Disable dropzone during upload
